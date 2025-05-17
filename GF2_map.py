@@ -1,6 +1,7 @@
 # version: 3 (2025-05-17)
 # 适用于 GF(2^m) 的Galois扩域。请注意：这里的基域只能是2。
 # 不可以是其他素数GF(p)->GF(p^m)或者GF(2^n)->GF(2^n^m)
+# 表示法：幂次表示法
 
 import numpy as np
 
@@ -13,7 +14,7 @@ import numpy as np
 # GF 2^7        Appendix        p(X) = 1 + X^6 + X^7                [1,0,0,0,0,0,1,1]
 # GF 2^8        Appendix        p(X) = 1 + X + X^6 + X^7 + X^8      [1,1,0,0,0,0,1,1,1]
 # GF 2^9        Appendix        p(X) = 1 + X^5 + X^9                [1,0,0,0,0,1,0,0,0,1]
-# GF 2^10       Appendix        p(X) = 1 + X^5 + X^9                [1,0,0,0,0,0,0,1,0,0,1]
+# GF 2^10       Appendix        p(X) = 1 + X^5 + X^10               [1,0,0,0,0,0,0,1,0,0,1]
 
 
 class GF2_map():
@@ -54,6 +55,8 @@ class GF2_map():
         exp = self.convert_tupleInt2exp(tupleInt)
         return exp
 
+
+    # 元素运算
     def add(self, x: int, y: int):
         assert x>=-1 and x<=2**self.m-2
         assert y>=-1 and y<=2**self.m-2
@@ -183,6 +186,41 @@ class GF2_map():
         remainder = self.poly_fresh(remainder)
         return quotient, remainder
 
+    # 求出函数值，GF（2^m）中的元素alphas_exp带入f(x)，求出值
+    def poly_function_value(self, polyfx: np.ndarray, ele: int):
+        results = -1
+        results = self.add(results, polyfx[0])
+        for process_x_exp in range(1, len(polyfx) ):
+            tmp = self.pow(ele, process_x_exp)
+            tmp = self.mul(tmp, polyfx[process_x_exp])
+            results = self.add(results, tmp)
+        return results
+
+    # mattsonSolomon 变换（Qin Huang 导数码论文形式）
+    def poly_mattsonSolomon_transform(self, polyx: np.ndarray):
+        n = len(polyx)
+        deg = len(polyx) -1
+        if n != 2**self.m-1:
+            raise NotImplementedError("[ERROR] MS transform: Degree of polynomial must be 2^m-2 (Length of polynomial must be 2^m-1).")
+        result_Az_vector = (-1) * np.ones(n, dtype=np.int32)
+        for j in range(0, n):
+            for i in range(0, n):
+                tmp = (-j * i) % n                 # 注意，例如计算( alpha^(-1)^ 3)，这里尽量不要直接调用alpha_pow函数，因为-1会被当作加法零元。
+                tmp = self.mul(polyx[i], tmp)
+                result_Az_vector[j] = self.add(result_Az_vector[j] , tmp)
+        return result_Az_vector
+    
+    # mattsonSolomon 逆变换（Qin Huang 导数码论文形式）
+    def poly_mattsonSolomon_inverseTransform(self, polyX: np.ndarray):
+        n = len(polyX)
+        deg = len(polyX) -1
+        if n != 2**self.m-1:
+            raise NotImplementedError("[ERROR] MS transform: Degree of polynomial must be 2^m-2 (Length of polynomial must be 2^m-1).")
+        result_az_vector = (-1) * np.ones(n, dtype=np.int32)
+        for j in range(0, n):
+            result_az_vector[j] = self.poly_function_value(polyX, j)
+        return result_az_vector
+
     # 其他功能：查询元素的阶
     def order_of_element(self, x: int):
         assert x>=-1 and x<=2**self.m-2
@@ -201,19 +239,18 @@ class GF2_map():
     
     # 其他功能：打印 所有元素的阶
     def print_elements_order(self):
-        print("alpha^(-1)")
-        print(" order of this element:    N/A")
+        print("alpha^(-1) order of this element:    ( order of this element: N/A )")
         for ele in range(0, 2**self.m-1):
             cnt=0
-            print("\nalpha^(%d)  " % ele ,end='')
+            print("alpha^(%d) [" % ele ,end='')
             for i in range(1, 2**self.m):
                 ans = (ele*i) % (2**self.m - 1)
                 cnt = cnt+1
-                print("%d "%ans, end='')
+                print("%d, "%ans, end='')
                 if ans ==0:
                     break
-            print("\n order of this element:    ", end='')
-            print(cnt)
+                
+            print(f"]      ( order of this element: {cnt} )  ")
         print("")
 
     # 其他功能：打印 所有元素的共轭对
@@ -302,6 +339,9 @@ if __name__ == "__main__":
     myGF2.print_elements_conjugates()
     myGF2.print_elements_cyclotomicCoset()
     myGF2.print_minimalPolynomials()
+
+    fx = np.array( [ 1,-1,7,12,14], dtype=np.int32)
+    print( myGF2.poly_function_value(fx, 6 )  )
 
 
     
