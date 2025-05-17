@@ -1,4 +1,4 @@
-# version: 2 (2025-05-17)
+# version: 3 (2025-05-17)
 # 适用于 GF(2^m) 的Galois扩域。请注意：这里的基域只能是2。
 # 不可以是其他素数GF(p)->GF(p^m)或者GF(2^n)->GF(2^n^m)
 
@@ -89,7 +89,7 @@ class GF2_map():
         if x==-1:
             result = -1
         else:
-            result = pow(x,power,2**self.m-1)         # warning("Especially on 'base_gf2_alpha_pow': alpha^(-1) may be regarded as alpha^(n-1) ")
+            result = (    (x % (2**self.m-1)  ) * (power % (2**self.m-1) )     ) % (2**self.m-1)         # warning("Especially on 'base_gf2_alpha_pow': alpha^(-1) may be regarded as alpha^(n-1) ")
         return result
 
 
@@ -183,7 +183,7 @@ class GF2_map():
         remainder = self.poly_fresh(remainder)
         return quotient, remainder
 
-    # 其他功能
+    # 其他功能：查询元素的阶
     def order_of_element(self, x: int):
         assert x>=-1 and x<=2**self.m-2
         if x == -1:
@@ -199,6 +199,7 @@ class GF2_map():
         assert (2**self.m-1) % cnt == 0
         return cnt
     
+    # 其他功能：打印 所有元素的阶
     def print_elements_order(self):
         print("alpha^(-1)")
         print(" order of this element:    N/A")
@@ -213,6 +214,29 @@ class GF2_map():
                     break
             print("\n order of this element:    ", end='')
             print(cnt)
+
+    # 其他功能：打印 所有元素的共轭对
+    def print_elements_conjugates(self):
+
+        already_record = []
+        for ele in range(-1, 2**self.m-1):
+            e = 1                               # 该元素的conjugates的数量
+            store = []
+            while True:
+                print(self.pow(ele,2**e))
+                print(ele)
+                if self.pow(ele,2**e) == ele:
+                    break
+                store.append( self.pow(ele,2**e) )
+                print(store)
+                e = e + 1
+            store.insert(0, ele)
+            assert type(store)==list
+            if (ele not in already_record):
+                already_record.extend(store)
+                print('alpha^%d has %d conjugates:' % (ele,e))
+                print(store)
+
 
 
 
@@ -233,9 +257,12 @@ if __name__ == "__main__":
     print(myGF2.poly_addinverse([-1,2,4,6,14]))
     print(myGF2.poly_mul([-1,2,4,6,14],[1,2,3,4,-1]))
     # myGF2.print_elements_order()
+    # myGF2.print_elements_conjugates()
     print(myGF2.order_of_element(9))
     print(myGF2.poly_div_euclidmod([-1,2,4,6,14],[1,2,3]))
     print(myGF2.poly_div_euclidmod([-1,13,13,2,4,6,14],[1,2,13,3]))
+
+    print(myGF2.pow(1,2**1))
 
 
 
