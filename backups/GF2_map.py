@@ -1,3 +1,5 @@
+version: 1 (2025-05-12)
+
 import numpy as np
 
 # GF 2^2        Appendix        p(X) = 1 + X + X^2                  [1,1,1]
