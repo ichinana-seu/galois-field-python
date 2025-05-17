@@ -214,17 +214,15 @@ class GF2_map():
                     break
             print("\n order of this element:    ", end='')
             print(cnt)
+        print("")
 
     # 其他功能：打印 所有元素的共轭对
     def print_elements_conjugates(self):
-
         already_record = []
         for ele in range(-1, 2**self.m-1):
             e = 1                               # 该元素的conjugates的数量
             store = []
             while True:
-                print(self.pow(ele,2**e))
-                print(ele)
                 if self.pow(ele,2**e) == ele:
                     break
                 store.append( self.pow(ele,2**e) )
@@ -233,10 +231,51 @@ class GF2_map():
             assert type(store)==list
             if (ele not in already_record):
                 already_record.extend(store)
-                print('alpha^%d has %d conjugates:' % (ele,e))
+                print('alpha^%d has %d conjugates:    ' % (ele,e), end="")
                 print(store)
+        print('All elements in the same conjugate set constitute a minimal polynomial')
+        print("")
 
+    # 其他功能：打印 所有分圆陪集
+    def print_elements_cyclotomicCoset(self):
+        already_record = []
+        for ele in range(0, 2**self.m-1):
+            e = 1                               # 该元素的conjugates的数量
+            store = [ele]
+            while True:
+                if self.pow(ele,2**e) in store:
+                    break
+                store.append( self.pow(ele,2**e) )
+                e = e + 1
+            assert type(store)==list
+            if (ele not in already_record):
+                already_record.extend(store)
+                print('alpha^%d leading cyclotomicCoset (size: %d):  ' % (ele,e), end='')
+                print(store)
+        print("")
 
+    # 其他功能：打印 所有最小多项式（基于元素的共轭对）
+    def print_minimalPolynomials(self):
+        already_record = []
+        for ele in range(-1, 2**self.m-1):
+            e = 1                               # 该元素的conjugates的数量
+            store = []
+            while True:
+                if self.pow(ele,2**e) == ele:
+                    break
+                store.append( self.pow(ele,2**e) )
+                e = e + 1
+            store.insert(0, ele)
+            assert type(store)==list
+            if (ele not in already_record):
+                already_record.extend(store)
+                result_poly = np.array([0], dtype=np.int32)
+                for index in range(0, e):
+                    factors = np.array([self.addinverse( self.pow(ele,2**index) ), 0] , dtype=np.int32)
+                    result_poly = self.poly_mul(result_poly, factors)
+                print(f'alpha^{store} constitute minimal polynomial:  ', end="")
+                print(result_poly.tolist())
+        print("")
 
 
 
@@ -252,16 +291,20 @@ if __name__ == "__main__":
 
     print(myGF2.convert_exp2tuple(7))
     print(myGF2.add(3,4))
+    print(myGF2.pow(1,2**1))
     print(myGF2.poly_add([-1,2,4,6,14],[1,2,3,4,-1]))
     print(myGF2.poly_addinverse([-1,2,4,6,14]))
     print(myGF2.poly_mul([-1,2,4,6,14],[1,2,3,4,-1]))
-    # myGF2.print_elements_order()
-    myGF2.print_elements_conjugates()
     print(myGF2.order_of_element(9))
     print(myGF2.poly_div_euclidmod([-1,2,4,6,14],[1,2,3]))
     print(myGF2.poly_div_euclidmod([-1,13,13,2,4,6,14],[1,2,13,3]))
+    myGF2.print_elements_order()
+    myGF2.print_elements_conjugates()
+    myGF2.print_elements_cyclotomicCoset()
+    myGF2.print_minimalPolynomials()
 
-    print(myGF2.pow(1,2**1))
+
+    
 
 
 
