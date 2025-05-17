@@ -1,3 +1,7 @@
+# version: 2 (2025-05-17)
+# 适用于 GF(2^m) 的Galois扩域。请注意：这里的基域只能是2。
+# 不可以是其他素数GF(p)->GF(p^m)或者GF(2^n)->GF(2^n^m)
+
 import numpy as np
 
 # GF 2^2        Appendix        p(X) = 1 + X + X^2                  [1,1,1]
@@ -146,10 +150,10 @@ class GF2_map():
         deg_r = deg_divisor - 1
         # 处理特殊情况：如果被除数次数小于除数次数，直接返回
         if deg_dividend < deg_divisor:
-                return np.array([-1]), polyx.copy()
+            return np.array([-1]), polyx.copy()
         # 初始化商和余数
         quotient = (-1) * np.ones(deg_q + 1, dtype=np.int32)
-        remainder = polyy.copy()
+        remainder = polyx.copy()
         while len(remainder)-1 >= deg_divisor:
             # 获取当前余数的最高次项指数和系数
             current_deg = len(remainder) - 1
@@ -217,7 +221,7 @@ class GF2_map():
 
 
 
-
+########################### 以下为测试 ##########################
 if __name__ == "__main__":
     polynomial = np.array([1,1,0,0,1], dtype=np.int32)
     myGF2 = GF2_map(polynomial, 4)
@@ -231,6 +235,7 @@ if __name__ == "__main__":
     # myGF2.print_elements_order()
     print(myGF2.order_of_element(9))
     print(myGF2.poly_div_euclidmod([-1,2,4,6,14],[1,2,3]))
+    print(myGF2.poly_div_euclidmod([-1,13,13,2,4,6,14],[1,2,13,3]))
 
 
 
