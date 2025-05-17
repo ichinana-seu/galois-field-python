@@ -1,4 +1,4 @@
-# version: 3 (2025-05-17)
+# version: 4 (2025-05-17)
 # 适用于 GF(2^m) 的Galois扩域。请注意：这里的基域只能是2。
 # 不可以是其他素数GF(p)->GF(p^m)或者GF(2^n)->GF(2^n^m)
 # 表示法：幂次表示法
@@ -314,8 +314,58 @@ class GF2_map():
                 print(result_poly.tolist())
         print("")
 
+    # 其他功能：打印 对应的BCH码 ( n = 2^m-1 )，t=? 的生成多项式gx，并返回gx
+    def print_BCH_gx(self, t):
+        BCH_n = 2**self.m - 1
+        if self.m < 3:
+            raise NotImplementedError("[ERROR] BCH gx: m should >= 3 .")
+        if t >= 2**(self.m-1):
+            raise NotImplementedError("[ERROR] BCH gx: t should < 2^(m-1) .")
+        process_table = list(range(1,2*t+1))
+        final_result_poly = np.array([0], dtype=np.int32)
+        while len(process_table) != 0:
+            ele = process_table[0]
+            e = 1                               # 该元素的conjugates的数量
+            store = []
+            while True:
+                if self.pow(ele,2**e) == ele:
+                    break
+                store.append( self.pow(ele,2**e) )
+                e = e + 1
+            store.insert(0, ele)
+            assert type(store)==list
+            result_poly = np.array([0], dtype=np.int32)
+            for index in range(0, e):
+                factors = np.array([self.addinverse( self.pow(ele,2**index) ), 0] , dtype=np.int32)
+                result_poly = self.poly_mul(result_poly, factors)
+            process_table = np.setdiff1d(process_table, store)
+            final_result_poly = self.poly_mul(final_result_poly, result_poly)
+        print(f'baseGF(2) , extGF(2^{self.m})')
+        print(f'm = {self.m} , t = {t}')
+        checkbits = len(final_result_poly)-1
+        BCH_k = BCH_n - checkbits
+        print(f'BCH ( {BCH_n} , {BCH_k} ) , #checkbits = {checkbits}')
+        print(f'g(X): {final_result_poly}\n')
+        assert type(final_result_poly) == np.ndarray
+        return final_result_poly
 
-
+    def print_RS_gx(self, t):
+        RS_n = 2**self.m**1 - 1
+        if 2*t >= 2**self.m:
+            raise NotImplementedError("[ERROR] RS gx: 2t should < baseGF(2^(m)) .")
+        final_result_poly = np.array([0], dtype=np.int32)
+        for ele in range(1, 2*t+1):
+            factor = np.array([self.addinverse(ele), 0] , dtype=np.int32)
+            final_result_poly = self.poly_mul(final_result_poly, factor)
+        print(f'baseGF(2^{self.m}) , extGF(2^{self.m}^1)')
+        print(f'm = {self.m} , t = {t} , distance = 2*{t}+1 = {2*t+1}')
+        checksymbols = len(final_result_poly)-1
+        RS_k = RS_n - checksymbols
+        print(f'RS ( {RS_n} symbols , {RS_k} symbols ) , #checksymbols = {checksymbols}')
+        print(f'RS ( {RS_n*self.m} bits, {RS_k*self.m} bits) , #checkbits = {checksymbols*self.m}  , when GF-symbol is mapped into binary form [BinaryRepresentation]')
+        print(f'g(X): {final_result_poly}\n')
+        assert type(final_result_poly) == np.ndarray
+        return final_result_poly
 
 
 
@@ -335,14 +385,17 @@ if __name__ == "__main__":
     print(myGF2.order_of_element(9))
     print(myGF2.poly_div_euclidmod([-1,2,4,6,14],[1,2,3]))
     print(myGF2.poly_div_euclidmod([-1,13,13,2,4,6,14],[1,2,13,3]))
+    fx = np.array( [ 1,-1,7,12,14], dtype=np.int32)
+    print( myGF2.poly_function_value(fx, 6 )  )
     myGF2.print_elements_order()
     myGF2.print_elements_conjugates()
     myGF2.print_elements_cyclotomicCoset()
     myGF2.print_minimalPolynomials()
+    myGF2.print_BCH_gx(3)
+    myGF2.print_RS_gx(2)
 
-    fx = np.array( [ 1,-1,7,12,14], dtype=np.int32)
-    print( myGF2.poly_function_value(fx, 6 )  )
 
+    
 
     
 
