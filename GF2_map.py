@@ -239,7 +239,7 @@ class GF2_map():
     
     # 其他功能：打印 所有元素的阶
     def print_elements_order(self):
-        print("alpha^(-1) order of this element:    ( order of this element: N/A )")
+        print("alpha^(-1)      ( order of this element: N/A )")
         for ele in range(0, 2**self.m-1):
             cnt=0
             print("alpha^(%d) [" % ele ,end='')
