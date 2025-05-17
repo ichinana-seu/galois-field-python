@@ -228,7 +228,6 @@ class GF2_map():
                 if self.pow(ele,2**e) == ele:
                     break
                 store.append( self.pow(ele,2**e) )
-                print(store)
                 e = e + 1
             store.insert(0, ele)
             assert type(store)==list
@@ -257,7 +256,7 @@ if __name__ == "__main__":
     print(myGF2.poly_addinverse([-1,2,4,6,14]))
     print(myGF2.poly_mul([-1,2,4,6,14],[1,2,3,4,-1]))
     # myGF2.print_elements_order()
-    # myGF2.print_elements_conjugates()
+    myGF2.print_elements_conjugates()
     print(myGF2.order_of_element(9))
     print(myGF2.poly_div_euclidmod([-1,2,4,6,14],[1,2,3]))
     print(myGF2.poly_div_euclidmod([-1,13,13,2,4,6,14],[1,2,13,3]))
