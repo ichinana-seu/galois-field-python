@@ -1,4 +1,4 @@
-# version: 4 (2025-05-17)
+# version: 5 (2025-05-18)
 # 适用于 GF(2^m) 的Galois扩域。请注意：这里的基域只能是2。
 # 不可以是其他素数GF(p)->GF(p^m)或者GF(2^n)->GF(2^n^m)
 # 表示法：幂次表示法
@@ -87,6 +87,7 @@ class GF2_map():
         result = (2**self.m-1 -x) % (2**self.m-1)
         return result
 
+    # 实用（相当于连乘）
     def pow(self, x: int, power: int):                           # power 个 x 相乘 % 请注意：在该函数中，-1不表示 "alpha^-1 ="0， 而表示 "alpha^(n-1) "
         assert x>=-1 and x<=2**self.m-2
         if x==-1:
@@ -94,6 +95,16 @@ class GF2_map():
         else:
             result = (    (x % (2**self.m-1)  ) * (power % (2**self.m-1) )     ) % (2**self.m-1)         # warning("Especially on 'base_gf2_alpha_pow': alpha^(-1) may be regarded as alpha^(n-1) ")
         return result
+
+    # 实用（相当于连加）
+    def addadd(self, x: int, times: int):
+        assert times>=1
+        assert x>=-1 and x<=2**self.m-2
+        result = -1
+        for i in range(0,times):
+            result = self.add(result, x)
+        return result
+
 
 
     # 域上多项式环，其系数应该是 GF(2^m) 中的元素，用指数形式(alpha^i)的i表示。
@@ -315,7 +326,7 @@ class GF2_map():
         print("")
 
     # 其他功能：打印 对应的BCH码 ( n = 2^m-1 )，t=? 的生成多项式gx，并返回gx
-    def print_BCH_gx(self, t):
+    def print_BCH_gx(self, t: int):
         BCH_n = 2**self.m - 1
         if self.m < 3:
             raise NotImplementedError("[ERROR] BCH gx: m should >= 3 .")
@@ -349,7 +360,7 @@ class GF2_map():
         assert type(final_result_poly) == np.ndarray
         return final_result_poly
 
-    def print_RS_gx(self, t):
+    def print_RS_gx(self, t: int):
         RS_n = 2**self.m**1 - 1
         if 2*t >= 2**self.m:
             raise NotImplementedError("[ERROR] RS gx: 2t should < baseGF(2^(m)) .")
