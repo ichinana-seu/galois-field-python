@@ -1,4 +1,4 @@
-# version: 5 (2025-05-18)
+# version: 6 (2025-05-19)
 # 适用于 GF(2^m) 的Galois扩域。请注意：这里的基域只能是2。
 # 不可以是其他素数GF(p)->GF(p^m)或者GF(2^n)->GF(2^n^m)
 # 表示法：幂次表示法
@@ -18,6 +18,7 @@ import numpy as np
 
 
 class GF2_map():
+    # 可访问元素：m, primitive_polynomials, table_exp2tuple, table_tupleInt2exp
     def __init__(self, primitive_polynomials: np.ndarray, m: int):
         assert primitive_polynomials.ndim == 1
         assert primitive_polynomials.dtype == np.int32
@@ -38,6 +39,7 @@ class GF2_map():
             self.table_tupleInt2exp[tupleInt] = exp
         print("Successfully initiatized GF2_map")
 
+    # 这些函数只在init时用到
     def convert_tuple2tupleInt(self, tuple: np.ndarray):
         return np.sum(tuple * (2 ** np.arange(len(tuple)))).item()
     
@@ -206,6 +208,17 @@ class GF2_map():
             tmp = self.mul(tmp, polyfx[process_x_exp])
             results = self.add(results, tmp)
         return results
+
+    # 求出多项式函数的导数
+    def poly_function_derivative(self, polyfx: np.ndarray):
+        if len(polyfx) == 1:        # 对常数函数求导，得到的结果是0，也就是-1
+            fy = np.array([-1], dtype=np.int32)
+            return fy
+        fy = polyfx[1:len(polyfx)].copy()
+        for y_index in range(0, len(fy) ):
+            fy[y_index] = self.addadd(fy[y_index], y_index+1)
+        fy = self.poly_fresh(fy)
+        return fy
 
     # mattsonSolomon 变换（Qin Huang 导数码论文形式）
     def poly_mattsonSolomon_transform(self, polyx: np.ndarray):
@@ -386,6 +399,7 @@ if __name__ == "__main__":
     polynomial = np.array([1,1,0,0,1], dtype=np.int32)
     myGF2 = GF2_map(polynomial, 4)
     print(myGF2.table_exp2tuple)
+    print(myGF2.table_tupleInt2exp)
 
     print(myGF2.convert_exp2tuple(7))
     print(myGF2.add(3,4))
@@ -405,10 +419,11 @@ if __name__ == "__main__":
     myGF2.print_BCH_gx(3)
     myGF2.print_RS_gx(2)
 
+    print(myGF2.poly_function_derivative([3, 3, 3, 3, 3,3,3,3,3,3]))
+
 
     
 
     
-
 
 
