@@ -1,4 +1,4 @@
-# version: 2 (2025-05-18)
+# version: 3 (2025-05-19)
 # 适用于 GF(2^m) 的Galois扩域。请注意：这里的基域只能是2。
 # 不可以是其他素数GF(p)->GF(p^m)或者GF(2^n)->GF(2^n^m)
 # 表示法：幂次表示法
@@ -90,7 +90,7 @@ def zhx_BCH_BerlekampMasseyDecoder(received_polynomial: np.ndarray, BCH_t: int, 
         '''print(f"\n\nitera_k = {itera_k + 1}")        '''
         '''print(f"sigma_function_itera = {sigma_function_itera[itera_k+2, 0:len(next_sigma_function)]}")         '''               
     # itera_k = 2t 结束啦
-    sigma_function_final = sigma_function_itera[2*BCH_t+1,:]
+    sigma_function_final = myGF2map.poly_fresh(sigma_function_itera[2*BCH_t+1,:])
 
     # try to find roots of sigma_function and take its mul_recipral
     errorlocation = []
@@ -126,6 +126,18 @@ def zhx_BCH_bin2poly(bin: np.ndarray):
     return results
 
 
+
+
+
+
+
+
+
+
+
+
+
+########################### 以下为测试 ##########################
 if __name__ == "__main__":
     primitive_polynomial = np.array([1,1,0,0,1], dtype=np.int32)
     myGF2 = GF2_map(primitive_polynomial, 4)
