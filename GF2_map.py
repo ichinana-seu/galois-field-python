@@ -141,14 +141,27 @@ class GF2_map():
         return result
 
     def poly_fresh(self, polyx: np.ndarray):                 # 为了防止最高位0占用空间，可以刷新一下多项式
+        assert len(polyx) >= 1
         pow_x = len(polyx)-1
         results = polyx.copy()
         while(1):
-            if results[len(results)-1]==-1 and len(results)!=1:
+            if results[len(results)-1]==-1 and len(results)>1:
                 results = results[0: len(results)-1]
             else:
                 break
         return results
+    
+    # 注意：零多项式的degree约定为-1
+    def poly_degree(self, polyx: np.ndarray):
+        polyx = self.poly_fresh(polyx)
+        if len(polyx)==1:
+            if polyx[0].item() == -1:
+                deg = -1
+            else:
+                deg = len(polyx)-1
+        else:
+            deg = len(polyx)-1
+        return deg
     
     def poly_div_euclidmod(self, polyx: np.ndarray, polyy: np.ndarray):        # 域上多项式环 的欧几里得带余除法
         polyx = self.poly_fresh(polyx)
@@ -160,8 +173,9 @@ class GF2_map():
         if np.all(polyx == -1):
             return np.array([-1]), np.array([-1])
         # 获取多项式次数
-        deg_dividend = len(polyx) - 1
-        deg_divisor = len(polyy) - 1
+        deg_dividend = self.poly_degree(polyx)
+        deg_divisor = self.poly_degree(polyy)
+        assert deg_divisor>-1
         deg_q = deg_dividend - deg_divisor
         deg_r = deg_divisor - 1
         # 处理特殊情况：如果被除数次数小于除数次数，直接返回
@@ -170,12 +184,12 @@ class GF2_map():
         # 初始化商和余数
         quotient = (-1) * np.ones(deg_q + 1, dtype=np.int32)
         remainder = polyx.copy()
-        while len(remainder)-1 >= deg_divisor:
+        while self.poly_degree(remainder) >= deg_divisor:
             # 获取当前余数的最高次项指数和系数
-            current_deg = len(remainder) - 1
+            current_deg = self.poly_degree(remainder)
             current_coeff = remainder[-1]
-            # 如果最高次项系数为0（-1表示），跳过此次循环
-            if current_coeff == -1:
+            # 如果最高次项系数为0（-1表示），跳过此次循环，fresh一下
+            if current_coeff == -1 and current_deg>-1:
                 remainder = self.poly_fresh(remainder)
                 continue
             # 计算商的当前项：current_coeff / divisor的最高次项系数
@@ -238,6 +252,7 @@ class GF2_map():
     def poly_mattsonSolomon_inverseTransform(self, polyX: np.ndarray):
         n = len(polyX)
         deg = len(polyX) -1
+        assert deg == self.poly_degree(polyX)
         if n != 2**self.m-1:
             raise NotImplementedError("[ERROR] MS transform: Degree of polynomial must be 2^m-2 (Length of polynomial must be 2^m-1).")
         result_az_vector = (-1) * np.ones(n, dtype=np.int32)

@@ -141,7 +141,8 @@ if __name__ == "__main__":
     primitive_polynomial = np.array([1,1,0,0,1], dtype=np.int32)
     myGF2 = GF2_map(primitive_polynomial, 4)
 
-    received_poly = np.array([ -1, -1, -1, 7, -1, -1, 9, -1, -1, -1, 11, -1, -1, -1, -1 ], dtype=np.int32)
+    # received_poly = np.array([ -1, -1, -1, 7, -1, -1, 9, -1, -1, -1, 11, -1, -1, -1, -1 ], dtype=np.int32)
+    received_poly = np.array([-1,  6, 10,  6,  4,  7,  2,  1,  8,  2,  6,  3,  3,  0,  3], dtype=np.int32)
     received_bins = zhx_RS_poly2binseq(received_poly, myGF2)
     print(f"received_poly = {received_poly}")
     print(f"received_bins = {received_bins}")
