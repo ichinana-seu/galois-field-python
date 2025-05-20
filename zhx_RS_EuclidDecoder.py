@@ -49,8 +49,9 @@ def zhx_RS_EuclidDecoder(received_polynomial: np.ndarray, RS_t: int, myGF2map: G
         sigma_func_tmp = myGF2map.poly_add( sigma_function_itera[itera_k+1 -2,:] , myGF2map.poly_addinverse( myGF2map.poly_mul( quo_itera[itera_k+1,:],   sigma_function_itera[itera_k+1 -1,:]      )        )      )
         sigma_function_itera[itera_k+1, 0:len(sigma_func_tmp)] = sigma_func_tmp
         # 中止条件
-        condition1 = len( myGF2map.poly_fresh(Z_function_itera[itera_k+1, :])  )-1    <   len( myGF2map.poly_fresh(sigma_function_itera[itera_k+1, :])  )-1
-        condition2 = len( myGF2map.poly_fresh(sigma_function_itera[itera_k+1, :])  )-1      <=    RS_t
+        condition1 = myGF2map.poly_degree(myGF2map.poly_fresh(Z_function_itera[itera_k+1, :])  )    <   myGF2map.poly_degree( myGF2map.poly_fresh(sigma_function_itera[itera_k+1, :])  )
+        condition2 = myGF2map.poly_degree( myGF2map.poly_fresh(sigma_function_itera[itera_k+1, :])  )     <=    RS_t
+        print(f"itera = {itera_k}, condition1 = {condition1}, condition2 = {condition2}")
         if condition1 and condition2:
             break
         # 准备下个循环
