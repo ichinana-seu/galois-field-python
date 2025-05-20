@@ -1,4 +1,4 @@
-# version: 6 (2025-05-19)
+# version: 7 (2025-05-20)
 # 适用于 GF(2^m) 的Galois扩域。请注意：这里的基域只能是2。
 # 不可以是其他素数GF(p)->GF(p^m)或者GF(2^n)->GF(2^n^m)
 # 表示法：幂次表示法
@@ -417,7 +417,7 @@ if __name__ == "__main__":
     myGF2.print_elements_cyclotomicCoset()
     myGF2.print_minimalPolynomials()
     myGF2.print_BCH_gx(3)
-    myGF2.print_RS_gx(2)
+    myGF2.print_RS_gx(3)
 
     print(myGF2.poly_function_derivative([3, 3, 3, 3, 3,3,3,3,3,3]))
 

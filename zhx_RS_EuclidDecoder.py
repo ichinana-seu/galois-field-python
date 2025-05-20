@@ -1,4 +1,4 @@
-# version: 2 (2025-05-19)
+# version: 3 (2025-05-20)
 # 适用于 GF(2^m) 的Galois扩域。请注意：这里的基域只能是2。
 # 不可以是其他素数GF(p)->GF(p^m)或者GF(2^n)->GF(2^n^m)
 # 表示法：幂次表示法
@@ -123,7 +123,6 @@ def zhx_RS_binseq2poly(binseq: np.ndarray, myGF2map: GF2_map):
     for row in range(0, binseq_grouped.shape[0] ):
         power[row] = myGF2map.convert_tuple2exp(binseq_grouped[row,:])
     return power
-
 
 
 
