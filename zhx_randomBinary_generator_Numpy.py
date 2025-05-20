@@ -1,4 +1,4 @@
-# version: 1 (2025-05-20)
+# version: 2 (2025-05-20)
 
 import numpy as np
 from GF2_map import GF2_map
