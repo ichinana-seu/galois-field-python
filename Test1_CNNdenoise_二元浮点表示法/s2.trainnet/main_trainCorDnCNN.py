@@ -8,7 +8,7 @@ from myConvNet_CorDnCNN import CorDnCNN
 
 if __name__ == "__main__":
     # 参数
-    device = 'cuda:0'
+    device = 'xpu'
     epoch_num = 20000              # 200000
     RS_binaryLength = 60
     IO_prefix = 'ReedSolomon_2p4_t3_N15K9_n60k36-AR0.8'            # 数据从“data__前缀”文件夹中读取，向“model__前缀”文件夹中写入

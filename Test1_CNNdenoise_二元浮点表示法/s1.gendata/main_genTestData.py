@@ -64,8 +64,6 @@ if __name__ == "__main__":
             # 保存结果
             network_X1 = received_bins
             network_Y1 = noise_bins
-            print(f"len of network_X1 = {len(network_X1)}")
-            print(f"len of network_Y1 = {len(network_Y1)}")
             network_X1.astype(np.float32).tofile(fp_X1)
             network_Y1.astype(np.float32).tofile(fp_Y1)
     fp_X1.close()

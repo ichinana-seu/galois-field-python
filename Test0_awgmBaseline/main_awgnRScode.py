@@ -21,7 +21,7 @@ if __name__ == "__main__":
     myTestGen = zhx_randomBinary_generator_Numpy(RS_n, RS_m, RS_t,gx, myGF2map)
     
 
-    Eval_ComplexSNR_dB_set = [-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0]
+    Eval_ComplexSNR_dB_set = [4.0] # [-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0]
     for ComplexSNR_dB in Eval_ComplexSNR_dB_set: 
         batch_id = 0
         error_blocks_now = 0

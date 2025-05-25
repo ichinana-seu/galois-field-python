@@ -23,7 +23,7 @@ if __name__ == "__main__":
     Eval_ComplexSNR_dB_set = [-1.0, 0.0, 1.0, 2.0, 3.0, 4.0]
     IO_prefix = 'ReedSolomon_2p4_t3_N15K9_n60k36-AR0.8'
     AR_gaussianNoise_para_eta = 0.8
-    device = 'cuda:0'
+    device = 'xpu'
 
     # 自动提取的参数
     RS_n = 2**RS_m-1
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     myTestGen.setpara_coloredGaussianARnoise(AR_gaussianNoise_para_eta)
 
     model_filename = f"{INPUT_model_directory}/model__{IO_prefix}__simpleTestCorDnCNN.pth"
-    myNet = torch.load(model_filename, map_location=torch.device(device))
+    myNet = torch.load(model_filename, map_location=torch.device(device), weights_only=False)
     myNet.eval()
 
     # Example
