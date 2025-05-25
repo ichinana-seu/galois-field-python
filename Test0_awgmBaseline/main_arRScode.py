@@ -15,10 +15,12 @@ if __name__ == "__main__":
     RS_n = 2**RS_m-1
     RS_binaryLength = RS_n*RS_m
 
+    AR_eta = 0.8
 
     primitive_polynomial = np.array([1,1,0,0,1], dtype=np.int32)
     myGF2map = GF2_map(primitive_polynomial, RS_m)
     myTestGen = zhx_randomBinary_generator_Numpy(RS_n, RS_m, RS_t,gx, myGF2map)
+    myTestGen.setpara_coloredGaussianARnoise(AR_eta)
     
 
     Eval_ComplexSNR_dB_set = [-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0]
@@ -35,7 +37,7 @@ if __name__ == "__main__":
             sigma_onedim = math.sqrt(noisepower_one_dim)
             codewords_poly = myTestGen.gen_codewords_poly()
             codewords_bins = zhx_RS_EuclidDecoder.zhx_RS_poly2binseq(codewords_poly, myGF2map)
-            noise_bins = myTestGen.gen_awgn_noise(sigma_onedim)
+            noise_bins = myTestGen.gen_coloredGaussianAR_noise(sigma_onedim)
             # channel
             received_bins = myTestGen.Bpsk_transfer(codewords_poly, noise_bins)
             # pre-process
