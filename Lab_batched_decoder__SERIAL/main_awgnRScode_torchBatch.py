@@ -11,7 +11,7 @@ import zhx_RS_EuclidDecoder_torchBatch
 if __name__ == "__main__":
     device = 'xpu'
     # 
-    batchsize = 100
+    batchsize = 1000
     gx = np.array( [ 6 , 9 , 6,  4, 14, 10,  0] , dtype=np.int32)
     RS_m = 4
     RS_t = 3
