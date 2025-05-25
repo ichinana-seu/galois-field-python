@@ -44,6 +44,7 @@ if __name__ == "__main__":
 
     model_filename = f"{INPUT_model_directory}/model__{IO_prefix}__simpleTestCorDnCNN.pth"
     myNet = torch.load(model_filename, map_location=torch.device(device))
+    myNet.eval()
 
     # Example
     for ComplexSNR_dB in Eval_ComplexSNR_dB_set:
@@ -64,10 +65,11 @@ if __name__ == "__main__":
             received_bins = myTestGen.Bpsk_transfer(codewords_poly, noise_bins)
             # decode - denoise
             received_bins_torch = torch.from_numpy(received_bins).to(device=device, dtype=torch.float32)
-            est_noise_torch = myNet(received_bins_torch)
+            est_noise_torch = myNet(received_bins_torch.unsqueeze(0)).squeeze(0)
             received_denoised_torch = received_bins_torch - est_noise_torch
-            received_denoised = received_denoised_torch.cpu().numpy()
+            received_denoised = received_denoised_torch.cpu().detach().numpy()
             received_hardDecision = (received_denoised<0).astype(np.int32)
+            
             received_hardDecision_poly = zhx_RS_EuclidDecoder.zhx_RS_binseq2poly(received_hardDecision, myGF2map)
             hardout_poly, failflag = zhx_RS_EuclidDecoder.zhx_RS_EuclidDecoder(received_hardDecision_poly, RS_t, myGF2map)
             hardout_bins = zhx_RS_EuclidDecoder.zhx_RS_poly2binseq(hardout_poly, myGF2map)
