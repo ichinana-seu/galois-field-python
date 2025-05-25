@@ -61,7 +61,6 @@ if __name__ == "__main__":
             elif np.any(hardout_bins!=codewords_bins):
                 print("修正，错误的修正")
             '''
-
             BLER_thisbatch = diff_row_num / 1.0
             BLER_final = batch_id / (batch_id + 1) * BLER_final + 1 / (batch_id + 1) * BLER_thisbatch
             error_blocks_now += diff_row_num
