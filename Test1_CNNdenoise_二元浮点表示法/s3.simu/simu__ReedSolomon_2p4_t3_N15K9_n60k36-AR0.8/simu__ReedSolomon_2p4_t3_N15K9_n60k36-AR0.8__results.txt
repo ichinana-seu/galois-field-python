@@ -1,3 +1,20 @@
-DiscreteComplexSNR_dB = -1.00      BER = 8.100e-04      BLER = 7.232e-03 
-DiscreteComplexSNR_dB = 0.00      BER = 9.160e-05      BLER = 7.529e-04 
-DiscreteComplexSNR_dB = 1.00      BER = 1.229e-05      BLER = 9.128e-05 
+
+# 特挑模型 Intel Arc B580
+DiscreteComplexSNR_dB = -5.00      BER = 7.432e-02      BLER = 5.440e-01 
+DiscreteComplexSNR_dB = -4.00      BER = 4.033e-02      BLER = 3.050e-01 
+DiscreteComplexSNR_dB = -3.00      BER = 1.168e-02      BLER = 9.900e-02 
+DiscreteComplexSNR_dB = -2.00      BER = 3.917e-03      BLER = 3.450e-02 
+DiscreteComplexSNR_dB = -1.00      BER = 6.648e-04      BLER = 5.889e-03 
+DiscreteComplexSNR_dB = 0.00      BER = 1.011e-04      BLER = 8.793e-04 
+DiscreteComplexSNR_dB = 1.00      BER = 7.124e-06      BLER = 5.624e-05 
+
+
+# 一般模型 
+DiscreteComplexSNR_dB = -5.00      BER = 8.617e-02      BLER = 6.390e-01 
+DiscreteComplexSNR_dB = -4.00      BER = 5.078e-02      BLER = 4.050e-01 
+DiscreteComplexSNR_dB = -3.00      BER = 2.775e-02      BLER = 2.300e-01 
+DiscreteComplexSNR_dB = -2.00      BER = 1.215e-02      BLER = 1.080e-01 
+DiscreteComplexSNR_dB = -1.00      BER = 3.817e-03      BLER = 3.550e-02 
+DiscreteComplexSNR_dB = 0.00      BER = 1.173e-03      BLER = 1.020e-02 
+DiscreteComplexSNR_dB = 1.00      BER = 1.727e-04      BLER = 1.576e-03 
+DiscreteComplexSNR_dB = 2.00      BER = 2.095e-05      BLER = 1.916e-04 
