@@ -26,7 +26,7 @@ if __name__ == "__main__":
     myTestGen.setpara_coloredGaussianARnoise(AR_eta)
     
 
-    Eval_ComplexSNR_dB_set = [4.0]
+    Eval_ComplexSNR_dB_set = [-5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
     for ComplexSNR_dB in Eval_ComplexSNR_dB_set: 
         batch_id = 0
         error_blocks_now = 0
@@ -73,7 +73,10 @@ if __name__ == "__main__":
             print('\rDiscreteComplexSNR_dB = %.2f      BER = %.3e      BLER = %.3e   (%2d/50)' % (ComplexSNR_dB, BER_final, BLER_final, error_blocks_now), end='', flush=True)
         
         print('\rDiscreteComplexSNR_dB = %.2f      BER = %.3e      BLER = %.3e   (%2d/50)' % (ComplexSNR_dB, BER_final, BLER_final, error_blocks_now), flush=True)
-
+        with open("./results.txt", mode='a') as fp:
+            fp.write('DiscreteComplexSNR_dB = %.2f      BER = %.3e      BLER = %.3e       (AR_noise_model)\n' % (ComplexSNR_dB, BER_final, BLER_final))
+    with open("./results.txt", mode='a') as fp:
+        fp.write('\n\n')
             
 
 

@@ -22,7 +22,7 @@ if __name__ == "__main__":
     gx = np.array( [ 6 , 9 , 6,  4, 14, 10,  0] , dtype=np.int32)       # RS码生成多项式
 
     # model
-    Eval_ComplexSNR_dB_set = [3.0, 4.0, 5.0]
+    Eval_ComplexSNR_dB_set = [5.0]
     IO_prefix = 'ReedSolomon_2p4_t3_N15K9_n60k36-AR0.8'
     AR_gaussianNoise_para_eta = 0.8
 
