@@ -1,0 +1,24 @@
+# awgn-harddecision
+Eb/N0_dB = 3.00      BER = 2.852e-02      BLER = 1.000e+00 
+Eb/N0_dB = 3.50      BER = 2.045e-02      BLER = 1.000e+00 
+Eb/N0_dB = 4.00      BER = 1.462e-02      BLER = 1.000e+00 
+Eb/N0_dB = 4.50      BER = 1.167e-02      BLER = 1.000e+00 
+Eb/N0_dB = 5.00      BER = 7.578e-03      BLER = 1.000e+00 
+Eb/N0_dB = 5.50      BER = 5.049e-03      BLER = 1.000e+00 
+Eb/N0_dB = 6.00      BER = 3.275e-03      BLER = 1.000e+00 
+Eb/N0_dB = 6.50      BER = 2.275e-03      BLER = 1.000e+00         (awgn-Harddecision)   
+Eb/N0_dB = 7.00      BER = 1.137e-03      BLER = 9.100e-01         (awgn-Harddecision)   
+Eb/N0_dB = 7.50      BER = 6.078e-04      BLER = 7.700e-01         (awgn-Harddecision)   
+Eb/N0_dB = 8.00      BER = 3.775e-04      BLER = 5.300e-01         (awgn-Harddecision)   
+Eb/N0_dB = 8.50      BER = 1.838e-04      BLER = 3.300e-01         (awgn-Harddecision)   
+Eb/N0_dB = 9.00      BER = 4.456e-05      BLER = 9.091e-02         (awgn-Harddecision)   
+
+# awgn-euclid
+Eb/N0_dB = 3.00      BER = 2.859e-02      BLER = 1.000e+00 
+Eb/N0_dB = 3.50      BER = 2.299e-02      BLER = 1.000e+00 
+Eb/N0_dB = 4.00      BER = 1.739e-02      BLER = 1.000e+00 
+Eb/N0_dB = 4.50      BER = 1.334e-02      BLER = 1.000e+00 
+Eb/N0_dB = 5.00      BER = 8.765e-03      BLER = 9.100e-01 
+Eb/N0_dB = 5.50      BER = 4.461e-03      BLER = 5.400e-01 
+Eb/N0_dB = 6.00      BER = 8.078e-04      BLER = 1.020e-01 
+Eb/N0_dB = 6.50      BER = 3.186e-05      BLER = 4.464e-03 

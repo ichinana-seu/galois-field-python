@@ -1,0 +1,2 @@
+
+DiscreteComplexSNR_dB = 3.00      BER = 4.531e-08      BLER = 2.665e-07 
