@@ -1,10 +1,11 @@
-# version: 7 (2025-05-20)
+# version: 8 (2025-07-15)
 # 适用于 GF(2^m) 的Galois扩域。请注意：这里的基域只能是2。
 # 不可以是其他素数GF(p)->GF(p^m)或者GF(2^n)->GF(2^n^m)
 # 表示法：幂次表示法
 
 import numpy as np
 
+# GF 2          请直接采用任意GF 2^m的参数（例如GF 2^2），运算会退化为GF2上运算，其中alpha为x^1-1=0的本原根，即alpha=1。由于运算的封闭性，因此结果只有alpha^-1和alpha^0两种结果。
 # GF 2^2        Appendix        p(X) = 1 + X + X^2                  [1,1,1]
 # GF 2^3        Appendix        p(X) = 1 + X^2 + X^3                [1,0,1,1]
 # GF 2^4        Appendix        p(X) = 1 + X^3 + X^4                [1,0,0,1,1]
