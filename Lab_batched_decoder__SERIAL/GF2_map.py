@@ -1,4 +1,4 @@
-# version: 8 (2025-07-15)
+# version: 11 (2025-07-15)
 # 适用于 GF(2^m) 的Galois扩域。请注意：这里的基域只能是2。
 # 不可以是其他素数GF(p)->GF(p^m)或者GF(2^n)->GF(2^n^m)
 # 表示法：幂次表示法
@@ -261,6 +261,172 @@ class GF2_map():
             result_az_vector[j] = self.poly_function_value(polyX, j)
         return result_az_vector
 
+    # 多项式的最大公约式[尚未实现]
+    def poly_gcd(self, polyx: np.ndarray, polyy: np.ndarray):
+        raise NotImplementedError("poly_gcd")
+    
+    # 多项式的最小公倍式[尚未实现]
+    def poly_lcm(self, polyx: np.ndarray, polyy: np.ndarray):
+        raise NotImplementedError("poly_lcm")
+
+    # 是否是 GF(2^m)上的"不可约多项式"
+    def poly_isIrreducible(self, polyx: np.ndarray):
+        # 检查是否能被低次不可约多项式整除
+        deg = self.poly_degree(polyx)
+        if deg == 0: # 常数不可约，但也不能称为“不可约多项式”，定义是这样的。所以直接raise error吧
+            raise ValueError("[ERROR] A degree=0 poly (const-poly) cannot be judged as Irreducible or NOT")
+        if deg == -1:   # 零多项式不可约
+            raise ValueError("[ERROR] A degree=-1 poly (zero-poly) cannot be judged as Irreducible or NOT")
+        if polyx[0] == -1: # 如果多项式的常数项为(alpha^-1)=0，则一定存在因式 x ，可约
+            return True
+        
+        # 生成随机多项式（作为除式）
+        def generate_lists_for_minus1_to_m(n, m):
+            """ 生成所有长度为n、元素范围为[-1, m]的列表，从[-1,-1,..., -1]到[m,m,...,m] """
+            if m < -1:
+                raise ValueError("m必须大于等于-1")
+            offset = 1  # 偏移量：-1 → 0, 0 → 1, ..., m → m+1
+            base = m + 2  # 总取值数
+            total = base ** n  # 所有可能的数组总数
+            result = []
+            for num in range(total):
+                # 初始化当前数组（偏移后的临时值）
+                temp = num
+                current = np.zeros(n, dtype=np.int32)
+                # 计算每个位置的偏移后的值
+                for i in range(n):
+                    current[i] = temp % base
+                    temp = temp // base
+                # 转换回原范围[-1, m]并反转顺序
+                current = current[::-1] - offset
+                result.append(current)
+            return result
+            
+        # 检查是否能被低次不可约多项式整除
+        for d in range(1, (deg // 2) + 1):              # 遍历deg=1的多项式，遍历deg=2的多项式，遍历deg=3的多项式....
+            # 生成所有次数为d的首一多项式（最高次项系数为alpha^0=1）
+            # 系数列表长度为d+1，最后一位为1 (alpha^0)
+            elelist = generate_lists_for_minus1_to_m(d, 2**self.m - 2)
+            for bits in elelist:  # 低d位（0~d-1次）的系数组合  例如d=4 则从 b0000 到 b10000-1=b1111
+                g = -1 * np.ones([d+1], dtype=np.int32)
+                g[d] = 0  # 首一多项式
+                for i in range(d):         # 0到d-1位，填充字符
+                    g[i] = bits[i]
+                # 排除零多项式
+                if self.poly_degree(g) == -1:
+                    raise ValueError("[ERROR] The tested divisor cannot be zero-poly.")
+                # 检查g是否整除f
+                _, rem = self.poly_div_euclidmod(polyx, g)
+                if self.poly_degree(rem) == -1:
+                    return False
+        return True
+    
+    # 先判断是否是 GF(2^m)上的"不可约多项式"，如果可约，给出GF(2^m)一个因式。如果不可约，则报错
+    def poly_factorize_once(self, polyx: np.ndarray):
+        if self.poly_isIrreducible(polyx) == True:
+            raise ValueError("[ERROR] Irreducible poly cannot be factorized")
+        
+        deg = self.poly_degree(polyx)
+        # 生成随机多项式（作为除式）
+        def generate_lists_for_minus1_to_m(n, m):
+            """ 生成所有长度为n、元素范围为[-1, m]的列表，从[-1,-1,..., -1]到[m,m,...,m] """
+            if m < -1:
+                raise ValueError("m必须大于等于-1")
+            offset = 1  # 偏移量：-1 → 0, 0 → 1, ..., m → m+1
+            base = m + 2  # 总取值数
+            total = base ** n  # 所有可能的数组总数
+            result = []
+            for num in range(total):
+                # 初始化当前数组（偏移后的临时值）
+                temp = num
+                current = np.zeros(n, dtype=np.int32)
+                # 计算每个位置的偏移后的值
+                for i in range(n):
+                    current[i] = temp % base
+                    temp = temp // base
+                # 转换回原范围[-1, m]并反转顺序
+                current = current[::-1] - offset
+                result.append(current)
+            return result
+            
+        # 检查是否能被低次不可约多项式整除
+        for d in range(1, (deg // 2) + 1):              # 遍历deg=1的多项式，遍历deg=2的多项式，遍历deg=3的多项式....
+            # 生成所有次数为d的首一多项式（最高次项系数为alpha^0=1）
+            # 系数列表长度为d+1，最后一位为1 (alpha^0)
+            elelist = generate_lists_for_minus1_to_m(d, 2**self.m - 2)
+            for bits in elelist:  # 低d位（0~d-1次）的系数组合  例如d=4 则从 b0000 到 b10000-1=b1111
+                g = -1 * np.ones([d+1], dtype=np.int32)
+                g[d] = 0  # 首一多项式
+                for i in range(d):         # 0到d-1位，填充字符
+                    g[i] = bits[i]
+                # 排除零多项式
+                if self.poly_degree(g) == -1:
+                    raise ValueError("[ERROR] The tested divisor cannot be zero-poly.")
+                # 检查g是否整除f
+                _, rem = self.poly_div_euclidmod(polyx, g)
+                if self.poly_degree(rem) == -1:
+                    return g
+        raise ValueError("[ERROR] Fatal Logic Error")
+
+    # 是否是 GF(2)上的"不可约多项式"
+    def poly_GF2_isIrreducible____GF2(self, polyx: np.ndarray):
+        # 检查系数是否在GF2上
+        if not np.all((polyx == 0) | (polyx == -1)):
+            raise ValueError("[ERROR] Poly coeffiencts should be alpha^-1=0 or alpha^0=1, otherwise function poly_GF2_isIrreducible____GF2 is invalid")
+        # 检查是否能被低次不可约多项式整除
+        deg = self.poly_degree(polyx)
+        if deg == 0: # 常数不可约，但也不能称为“不可约多项式”，定义是这样的。所以直接raise error吧
+            raise ValueError("[ERROR] A degree=0 poly (const-poly) cannot be judged as Irreducible or NOT")
+        if deg == -1:   # 零多项式不可约
+            raise ValueError("[ERROR] A degree=-1 poly (zero-poly) cannot be judged as Irreducible or NOT")
+        if polyx[0] == -1: # 如果多项式的常数项为(alpha^-1)=0，则一定存在因式 x ，可约
+            return True
+        # 检查是否能被低次不可约多项式整除
+        for d in range(1, (deg // 2) + 1):              # 遍历deg=1的多项式，遍历deg=2的多项式，遍历deg=3的多项式....
+            # 生成所有次数为d的首一多项式（最高次项系数为alpha^0=1）
+            # 系数列表长度为d+1，最后一位为1 (alpha^0)
+            for bits in range(0, 1 << d):  # 低d位（0~d-1次）的系数组合  例如d=4 则从 b0000 到 b10000-1=b1111
+                g = -1 * np.ones([d+1], dtype=np.int32)
+                g[d] = 0  # 首一多项式
+                for i in range(d):         # 0到d-1位，填充字符
+                    g[i] = (  (bits >> i) & 1  ) -1
+                # 排除零多项式
+                if self.poly_degree(g) == -1:
+                    raise ValueError("[ERROR] The tested divisor cannot be zero-poly.")
+                # 检查g是否整除f
+                _, rem = self.poly_div_euclidmod(polyx, g)
+                if self.poly_degree(rem) == -1:
+                    return False
+        return True
+    
+    # 先判断是否是 GF(2)上的"不可约多项式"，如果可约，给出GF(2)一个因式。如果不可约，则报错。
+    def poly_GF2_factorize_once____GF2(self, polyx: np.ndarray):
+        if self.poly_GF2_isIrreducible____GF2(polyx) == True:
+            raise ValueError("[ERROR] Irreducible poly cannot be factorized")
+        
+        deg = self.poly_degree(polyx)
+        # 检查是否能被低次不可约多项式整除
+        for d in range(1, (deg // 2) + 1):              # 遍历deg=1的多项式，遍历deg=2的多项式，遍历deg=3的多项式....
+            # 生成所有次数为d的首一多项式（最高次项系数为alpha^0=1）
+            # 系数列表长度为d+1，最后一位为1 (alpha^0)
+            for bits in range(0, 1 << d):  # 低d位（0~d-1次）的系数组合  例如d=4 则从 b0000 到 b10000-1=b1111
+                g = -1 * np.ones([d+1], dtype=np.int32)
+                g[d] = 0  # 首一多项式
+                for i in range(d):         # 0到d-1位，填充字符
+                    g[i] = (  (bits >> i) & 1  ) -1
+                # 排除零多项式
+                if self.poly_degree(g) == -1:
+                    raise ValueError("[ERROR] The tested divisor cannot be zero-poly.")
+                # 检查g是否整除f
+                _, rem = self.poly_div_euclidmod(polyx, g)
+                if self.poly_degree(rem) == -1:
+                    return g
+        raise ValueError("[ERROR] Fatal Logic Error")
+        
+        
+
+
+
     # 其他功能：查询元素的阶
     def order_of_element(self, x: int):
         assert x>=-1 and x<=2**self.m-2
@@ -389,6 +555,7 @@ class GF2_map():
         assert type(final_result_poly) == np.ndarray
         return final_result_poly
 
+    # 其他功能：打印 对应的RS码 ( n = 2^m-1 )，t=? 的生成多项式gx，并返回gx
     def print_RS_gx(self, t: int):
         RS_n = 2**self.m**1 - 1
         if 2*t >= 2**self.m:
@@ -438,7 +605,20 @@ if __name__ == "__main__":
     print(myGF2.poly_function_derivative([3, 3, 3, 3, 3,3,3,3,3,3]))
 
 
-    
+    # 测试一下GF(2^m)上的分解
+    c = np.array([0, -1, -1, 0, 0], dtype=np.int32) 
+    print(myGF2.poly_isIrreducible( c )  )
+    a = myGF2.poly_factorize_once( c ) 
+    print( a )
+    b,_ = myGF2.poly_div_euclidmod(c, a)
+    print( b )
+    ab = myGF2.poly_mul(a,b)
+    print(ab)
+    print("")
+
+    # 测试一下GF(2)上的分解
+    print(myGF2.poly_GF2_isIrreducible____GF2(np.array([0, 0], dtype=np.int32)  )  )
+    print(myGF2.poly_GF2_isIrreducible____GF2(np.array([0, -1, -1, 0, 0], dtype=np.int32)  )  )
 
     
 
