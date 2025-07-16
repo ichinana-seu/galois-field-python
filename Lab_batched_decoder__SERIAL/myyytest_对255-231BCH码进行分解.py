@@ -11,8 +11,8 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    polynomial = np.array([1,0,0,0,0,1,1], dtype=np.int32)
-    myGF2 = GF2_map(polynomial, 6)
+    polynomial = np.array([1,1,0,0,0,0,1,1,1], dtype=np.int32)
+    myGF2 = GF2_map(polynomial, 8)
     print(myGF2.table_exp2tuple)
     print(myGF2.table_tupleInt2exp)
     myGF2.print_elements_cyclotomicCoset()

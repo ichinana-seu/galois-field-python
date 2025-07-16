@@ -1,4 +1,4 @@
-# version: 11 (2025-07-15)
+# version: 12 (2025-07-16)
 # 适用于 GF(2^m) 的Galois扩域。请注意：这里的基域只能是2。
 # 不可以是其他素数GF(p)->GF(p^m)或者GF(2^n)->GF(2^n^m)
 # 表示法：幂次表示法
@@ -322,10 +322,7 @@ class GF2_map():
         return True
     
     # 先判断是否是 GF(2^m)上的"不可约多项式"，如果可约，给出GF(2^m)一个因式。如果不可约，则报错
-    def poly_factorize_once(self, polyx: np.ndarray):
-        if self.poly_isIrreducible(polyx) == True:
-            raise ValueError("[ERROR] Irreducible poly cannot be factorized")
-        
+    def poly_factorize_once(self, polyx: np.ndarray):  
         deg = self.poly_degree(polyx)
         # 生成随机多项式（作为除式）
         def generate_lists_for_minus1_to_m(n, m):
@@ -366,6 +363,7 @@ class GF2_map():
                 _, rem = self.poly_div_euclidmod(polyx, g)
                 if self.poly_degree(rem) == -1:
                     return g
+        raise ValueError("[ERROR] Irreducible poly cannot be factorized")       # self.poly_isIrreducible(polyx) == True
         raise ValueError("[ERROR] Fatal Logic Error")
 
     # 是否是 GF(2)上的"不可约多项式"
@@ -399,14 +397,13 @@ class GF2_map():
                     return False
         return True
     
-    # 先判断是否是 GF(2)上的"不可约多项式"，如果可约，给出GF(2)一个因式。如果不可约，则报错。
-    def poly_GF2_factorize_once____GF2(self, polyx: np.ndarray):
-        if self.poly_GF2_isIrreducible____GF2(polyx) == True:
-            raise ValueError("[ERROR] Irreducible poly cannot be factorized")
-        
+    # 先判断是否是 GF(2)上的"不可约多项式"，如果可约，给出GF(2)一个因式。如果不可约，则报错AssertionError，用于捕获错误。
+    def poly_GF2_factorize_once____GF2(self, polyx: np.ndarray, verbose: bool=False, tryDegreeStartFrom: int=1):
         deg = self.poly_degree(polyx)
         # 检查是否能被低次不可约多项式整除
-        for d in range(1, (deg // 2) + 1):              # 遍历deg=1的多项式，遍历deg=2的多项式，遍历deg=3的多项式....
+        for d in range(tryDegreeStartFrom, (deg // 2) + 1):              # 遍历deg=1的多项式，遍历deg=2的多项式，遍历deg=3的多项式....
+            if verbose==True:
+                print(f"\r now trying degree {d}          ", end="", flush=True)
             # 生成所有次数为d的首一多项式（最高次项系数为alpha^0=1）
             # 系数列表长度为d+1，最后一位为1 (alpha^0)
             for bits in range(0, 1 << d):  # 低d位（0~d-1次）的系数组合  例如d=4 则从 b0000 到 b10000-1=b1111
@@ -420,7 +417,10 @@ class GF2_map():
                 # 检查g是否整除f
                 _, rem = self.poly_div_euclidmod(polyx, g)
                 if self.poly_degree(rem) == -1:
+                    if verbose==True:
+                        print("")
                     return g
+        raise AssertionError("[ERROR] Irreducible poly cannot be factorized")       # 说明了  self.poly_GF2_isIrreducible____GF2(polyx) == True:
         raise ValueError("[ERROR] Fatal Logic Error")
         
         
