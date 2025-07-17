@@ -1,4 +1,4 @@
-# version: 12 (2025-07-16)
+# version: 13 (2025-07-17)
 # 适用于 GF(2^m) 的Galois扩域。请注意：这里的基域只能是2。
 # 不可以是其他素数GF(p)->GF(p^m)或者GF(2^n)->GF(2^n^m)
 # 表示法：幂次表示法
@@ -261,14 +261,6 @@ class GF2_map():
             result_az_vector[j] = self.poly_function_value(polyX, j)
         return result_az_vector
 
-    # 多项式的最大公约式[尚未实现]
-    def poly_gcd(self, polyx: np.ndarray, polyy: np.ndarray):
-        raise NotImplementedError("poly_gcd")
-    
-    # 多项式的最小公倍式[尚未实现]
-    def poly_lcm(self, polyx: np.ndarray, polyy: np.ndarray):
-        raise NotImplementedError("poly_lcm")
-
     # 是否是 GF(2^m)上的"不可约多项式"
     def poly_isIrreducible(self, polyx: np.ndarray):
         # 检查是否能被低次不可约多项式整除
@@ -366,6 +358,63 @@ class GF2_map():
         raise ValueError("[ERROR] Irreducible poly cannot be factorized")       # self.poly_isIrreducible(polyx) == True
         raise ValueError("[ERROR] Fatal Logic Error")
 
+    # 多项式的最大公约式【Euclid辗转相除法】
+    def poly_gcd(self, polyx: np.ndarray, polyy: np.ndarray):
+        a = self.poly_fresh(polyx.copy())
+        b = self.poly_fresh(polyy.copy())
+        # 处理零多项式情况
+        if self.poly_degree(a) == -1 and self.poly_degree(b) == -1:  # a,b是零多项式
+            raise ValueError("[ERROR] GCD of two zero polynomials is undefined.")
+        elif self.poly_degree(a) == -1 and self.poly_degree(b) != -1:  # a是零多项式, 但b不是
+            print("[WARNING] Incidence: 零多项式与非零多项式的GCD是非零多项式本身")
+            result = b                                                                                  # 零多项式与非零多项式的GCD是非零多项式本身（需首一化）
+        elif self.poly_degree(a) != -1 and self.poly_degree(b) == -1:  # b是零多项式, 但a不是
+            print("[WARNING] Incidence: 零多项式与非零多项式的GCD是非零多项式本身")
+            result = a                                                                                  # 零多项式与非零多项式的GCD是非零多项式本身（需首一化）
+        else:
+            # 欧几里得算法核心循环：gcd(a, b) = gcd(b, a mod b)
+            while self.poly_degree(b) != -1:
+                _, rem = self.poly_div_euclidmod(a, b)  # 计算a mod b
+                a, b = b, rem  # 迭代：a = b, b = a mod b
+            result = a
+
+        # 将结果首一化（最高次项系数为alpha^0=0）
+        if self.poly_degree(result) != -1:                      # 非零多项式才需要首一化
+            leading_coeff = result[-1]                          # 最高次项系数
+            if leading_coeff != 0:                              # 若最高次项系数不是alpha^0，则乘以其逆元
+                inv_leading = self.mulinverse(leading_coeff)
+                # 构造常数多项式[inv_leading]，用于乘法
+                scalar_poly = np.array([inv_leading], dtype=np.int32)
+                result = self.poly_mul(result, scalar_poly)
+                result = self.poly_fresh(result)  # 刷新多项式
+        return result
+    
+    # 多项式的最小公倍式【乘积 / GCD法】
+    def poly_lcm(self, polyx: np.ndarray, polyy: np.ndarray):
+        # 刷新输入多项式
+        f = self.poly_fresh(polyx.copy())
+        g = self.poly_fresh(polyy.copy())
+        # 处理零多项式：零多项式与任何多项式的LCM是零多项式
+        if self.poly_degree(f) == -1 or self.poly_degree(g) == -1:
+            print("[WARNING] Incidence: 零多项式与任何多项式的LCM是零多项式")
+            return np.array([-1], dtype=np.int32)  # 零多项式
+        # 利用公式：lcm(f, g) = (f * g) / gcd(f, g)
+        gcd_fg = self.poly_gcd(f, g)
+        product = self.poly_mul(f, g)  # 计算f*g
+        lcm_poly, _ = self.poly_div_euclidmod(product, gcd_fg)  # 除以GCD
+        # 将结果首一化
+        if self.poly_degree(lcm_poly) != -1:
+            leading_coeff = lcm_poly[-1]
+            if leading_coeff != 0:
+                inv_leading = self.mulinverse(leading_coeff)
+                scalar_poly = np.array([inv_leading], dtype=np.int32)
+                lcm_poly = self.poly_mul(lcm_poly, scalar_poly)
+                lcm_poly = self.poly_fresh(lcm_poly)
+        return lcm_poly
+
+
+    ############################################################  GF(2)上的一些功能  ############################################################
+
     # 是否是 GF(2)上的"不可约多项式"
     def poly_GF2_isIrreducible____GF2(self, polyx: np.ndarray):
         # 检查系数是否在GF2上
@@ -397,8 +446,11 @@ class GF2_map():
                     return False
         return True
     
-    # 先判断是否是 GF(2)上的"不可约多项式"，如果可约，给出GF(2)一个因式。如果不可约，则报错AssertionError，用于捕获错误。
+    # GF(2)多项式如果可约，给出GF(2)一个因式。如果不可约，则报错AssertionError，用于捕获错误。
     def poly_GF2_factorize_once____GF2(self, polyx: np.ndarray, verbose: bool=False, tryDegreeStartFrom: int=1):
+        # 检查系数是否在GF2上
+        if not np.all((polyx == 0) | (polyx == -1)):
+            raise ValueError("[ERROR] Poly coeffiencts should be alpha^-1=0 or alpha^0=1, otherwise function poly_GF2_factorize_once____GF2 is invalid")
         deg = self.poly_degree(polyx)
         # 检查是否能被低次不可约多项式整除
         for d in range(tryDegreeStartFrom, (deg // 2) + 1):              # 遍历deg=1的多项式，遍历deg=2的多项式，遍历deg=3的多项式....
@@ -422,10 +474,62 @@ class GF2_map():
                     return g
         raise AssertionError("[ERROR] Irreducible poly cannot be factorized")       # 说明了  self.poly_GF2_isIrreducible____GF2(polyx) == True:
         raise ValueError("[ERROR] Fatal Logic Error")
-        
-        
 
+    # GF(2)多项式，给出所有不可约因式。返回list格式
+    def poly_GF2_factorize_all____GF2(self, polyx: np.ndarray, doublecheck: bool=False, verbose: bool=False):
+        # 检查系数是否在GF2上
+        if not np.all((polyx == 0) | (polyx == -1)):
+            raise ValueError("[ERROR] Poly coeffiencts should be alpha^-1=0 or alpha^0=1, otherwise function poly_GF2_factorize_once____GF2 is invalid")
+        
+        factors = []
+        PolyNow = polyx.copy()
 
+        tryDegreeFrom = 1
+        while True:
+            try:
+                one_factor = self.poly_GF2_factorize_once____GF2(PolyNow, verbose=verbose, tryDegreeStartFrom=tryDegreeFrom)       # 一种加速手段：既然前面的degree都尝试过了，不可能是因子，那下次就别尝试了
+            except AssertionError:                  # 无法进行分解了，那就退出循环吧
+                break
+
+            remain, _ = self.poly_div_euclidmod(PolyNow, one_factor)
+            # 一般来说，还是double check一下不可约性
+            if doublecheck==True:
+                if self.poly_GF2_isIrreducible____GF2(one_factor) == True:
+                    factors.append(one_factor)
+                else:
+                    raise ValueError("[ERROR] 分解后，因子仍然不是 不可约的")
+            if doublecheck==False:
+                factors.append(one_factor)
+            
+            tryDegreeFrom = self.poly_degree(one_factor)
+            PolyNow = remain
+
+        factors.append(PolyNow)
+
+        # 再次确保每个因子都是不可分的
+        if doublecheck==True:
+            for some_factor in factors:
+                assert self.poly_GF2_isIrreducible____GF2(some_factor)
+
+        return factors
+
+    # GF(2)多项式，给出GF(2)上的GCD。
+    def poly_GF2_poly_gcd____GF2(self, polyx: np.ndarray, polyy: np.ndarray):
+        # 检查系数是否在GF2上
+        if not np.all((polyx == 0) | (polyx == -1)):
+            raise ValueError("[ERROR] Poly coeffiencts should be alpha^-1=0 or alpha^0=1, otherwise function poly_GF2_poly_gcd____GF2 is invalid")
+        if not np.all((polyy == 0) | (polyy == -1)):
+            raise ValueError("[ERROR] Poly coeffiencts should be alpha^-1=0 or alpha^0=1, otherwise function poly_GF2_poly_gcd____GF2 is invalid")
+        return self.poly_gcd(polyx, polyy)
+        
+    # GF(2)多项式，给出GF(2)上的LCM。
+    def poly_GF2_poly_lcm____GF2(self, polyx: np.ndarray, polyy: np.ndarray):
+        # 检查系数是否在GF2上
+        if not np.all((polyx == 0) | (polyx == -1)):
+            raise ValueError("[ERROR] Poly coeffiencts should be alpha^-1=0 or alpha^0=1, otherwise function poly_GF2_poly_lcm____GF2 is invalid")        
+        if not np.all((polyy == 0) | (polyy == -1)):
+            raise ValueError("[ERROR] Poly coeffiencts should be alpha^-1=0 or alpha^0=1, otherwise function poly_GF2_poly_lcm____GF2 is invalid")
+        return self.poly_lcm(polyx, polyy)
 
     # 其他功能：查询元素的阶
     def order_of_element(self, x: int):

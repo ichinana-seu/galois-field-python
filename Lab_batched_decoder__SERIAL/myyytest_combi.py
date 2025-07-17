@@ -1,5 +1,6 @@
 from GF2_map import GF2_map
 import numpy as np
+from itertools import combinations
 
 # GF 2^2        Appendix        p(X) = 1 + X + X^2                  [1,1,1]
 # GF 2^3        Appendix        p(X) = 1 + X^2 + X^3                [1,0,1,1]
@@ -14,15 +15,18 @@ import numpy as np
 
 
 if __name__ == "__main__":
-    polynomial = np.array([1,1,0,0,0,0,1,1,1], dtype=np.int32)
-    myGF2 = GF2_map(polynomial, 8)
-    print(myGF2.table_exp2tuple)
-    print(myGF2.table_tupleInt2exp)
-    myGF2.print_elements_cyclotomicCoset()
-    print(myGF2.order_of_element(3))
-    myGF2.print_minimalPolynomials()
+    factorsetidx_1 = set(range(0, 12))
+    factorsetidx_2 = set(range(0, 2))
 
-    myGF2.print_BCH_gx(t=3)
+
+    combinations1 = combinations(factorsetidx_1, 1)
+    for combo1 in combinations1:
+        combinations2 = combinations(factorsetidx_2, 1)
+        for combo2 in combinations2:
+            print("combinationsA: ")
+            print(combo1)
+            print("combinationsB: ")
+            print(combo2)
 
 
 
