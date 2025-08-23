@@ -111,6 +111,14 @@ class GF2_map():
 
 
     # 域上多项式环，其系数应该是 GF(2^m) 中的元素，用指数形式(alpha^i)的i表示。
+    def poly_isequal(self, polyx: np.ndarray, polyy: np.ndarray):
+        a = self.poly_fresh(polyx.copy())
+        b = self.poly_fresh(polyy.copy())
+        # 先判断长度是否相同，不同则直接不相等
+        if len(a) != len(b):
+            return False
+        return np.all(a==b)
+    
     def poly_add(self, polyx: np.ndarray, polyy: np.ndarray):
         pow_x = len(polyx)-1
         pow_y = len(polyy)-1
@@ -625,7 +633,7 @@ class GF2_map():
         print("")
 
     # 其他功能：打印 对应的BCH码 ( n = 2^m-1 )，t=? 的生成多项式gx，并返回gx
-    def print_BCH_gx(self, t: int):
+    def print_BCH_gx(self, t: int, verbose: bool=True):
         BCH_n = 2**self.m - 1
         if self.m < 3:
             raise NotImplementedError("[ERROR] BCH gx: m should >= 3 .")
@@ -660,7 +668,7 @@ class GF2_map():
         return final_result_poly
 
     # 其他功能：打印 对应的RS码 ( n = 2^m-1 )，t=? 的生成多项式gx，并返回gx
-    def print_RS_gx(self, t: int):
+    def print_RS_gx(self, t: int, verbose: bool=True):
         RS_n = 2**self.m**1 - 1
         if 2*t >= 2**self.m:
             raise NotImplementedError("[ERROR] RS gx: 2t should < baseGF(2^(m)) .")

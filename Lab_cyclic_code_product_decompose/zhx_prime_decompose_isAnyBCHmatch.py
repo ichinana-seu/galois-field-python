@@ -213,9 +213,29 @@ def poly_lcm_GF2(polyx: np.ndarray, polyy: np.ndarray):
 
 
 # 尝试将 某个GF(2)上的循环码（例如BCH 255 231）分解为2维的product codes
-def zhx_cyclicProductCode_decomposition(n: int, k: int, gx: np.ndarray, verbose: bool=True):
+def zhx_cyclicProductCode_decomposition___matchBCH_255(n: int, verbose: bool=True):
     # 先将码长n分解为互素的两个数的乘积
     coprimePairs = decompose_num_into_coprimePairs(n)
+
+    BCH_list = []
+    stdGF2=GF2_map(np.array([1,1,0,0,0,0,1,1,1], dtype=np.int32), 8)
+    for t in range(1, 2**(stdGF2.m-1)):
+        someGxBCH = stdGF2.print_BCH_gx(t ,verbose=False)
+        if len(BCH_list)==0:        # init
+            BCH_list.append(someGxBCH)
+
+        addflag = True
+        for listele in BCH_list:
+            addflag = True
+            if stdGF2.poly_isequal(listele, someGxBCH):
+                addflag = False
+                break
+        if addflag == True:
+            BCH_list.append(someGxBCH)
+
+    print(BCH_list)
+
+    
 
     # 判断x^n - 1 = 0 这个方程组是否含有重根
     # 在GF(2)及其扩域、分裂域中：
@@ -291,39 +311,19 @@ def zhx_cyclicProductCode_decomposition(n: int, k: int, gx: np.ndarray, verbose:
 
                         # ################################################
                         lcm = myGF2.poly_GF2_poly_lcm____GF2(gcd1, gcd2)
-                        with open("./dump.txt", "a") as fp:
-                            print(f"(n1={n1} , k1={n1-myGF2.poly_degree(gx1)})")
-                            print(f"(n2={n2} , k2={n2-myGF2.poly_degree(gx2)})")
-                            print(f"(n={n} , k={n-myGF2.poly_degree(lcm)})")
-                            print("gx1")
-                            print(gx1)
-                            print("gx2")
-                            print(gx2)
-                            print("gx")
-                            print(lcm)
-                            print('------------------------------------------------------')
-                            fp.write(f"(n1={n1} , k1={n1-myGF2.poly_degree(gx1)}) \n")
-                            fp.write(f"(n2={n2} , k2={n2-myGF2.poly_degree(gx2)}) \n")
-                            fp.write(f"(n={n} , k={n-myGF2.poly_degree(lcm)}) \n")
-                            fp.write("\ngx1")
-                            fp.write(str(gx1))
-                            fp.write("\ngx2")
-                            fp.write(str(gx2))
-                            fp.write("\ngx")
-                            fp.write(str(lcm))
-                            fp.write('\n------------------------------------------------------\n')
-                        # ################################################
-                        #print(f"gx1={gx1} ,gx2={gx2}")
-                        #print(f"gx1ext={gx1ext} ,gx2ext={gx2ext}")
-                        #print(f"gcd1={gcd1} ,gcd2={gcd2}")
-                        #print(f"gx=lcm={lcm}")
-                        if myGF2.poly_isequal(gx, lcm):
-                            print("FIND!!!!")
-                            print("gx1")
-                            print(gx1)
-                            print("gx2")
-                            print(gx2)
-                            return n1,n2,a,b,gx1,gx2,lcm
+                        for someGxBCH in BCH_list:
+                            if myGF2.poly_isequal(someGxBCH, lcm):
+                                print("FIND!!!!")
+                                print("gx1")
+                                print(gx1)
+                                print("gx2")
+                                print(gx2)
+                                print("gx")
+                                print(lcm)
+                                print("BCH t")
+                                print(t)
+                                break
+
     raise TimeoutError("[ERROR] 无法找到匹配的gx")
 
 
@@ -418,4 +418,4 @@ if __name__ == "__main__":
     print(poly_factorize_GF2(gcd_result, doublecheck=False, verbose=True))
     '''
 
-    zhx_cyclicProductCode_decomposition(255, 231, np.array([ 0 , 0  ,0 ,-1,  0, -1,  0 , 0 ,-1 , 0, -1 ,-1  ,0,  0 , 0 , 0 ,-1 , 0 ,-1 , 0, -1, -1 , 0 ,-1 ,0] , dtype=np.int32))
+    zhx_cyclicProductCode_decomposition___matchBCH_255(255)
